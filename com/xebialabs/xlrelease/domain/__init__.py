@@ -1,7 +1,7 @@
 from .base_configuration_item import BaseConfigurationItem
-from .phase import Phase
-from .plan_item import PlanItem
-from .release import Release
-from .task import Task
+from .plan_items import Phase
+from .plan_items import PlanItem
+from .plan_items import Release
+from .plan_items import Task
 
 __all__ = ["BaseConfigurationItem", "Phase", "PlanItem", "Release", "Task"]

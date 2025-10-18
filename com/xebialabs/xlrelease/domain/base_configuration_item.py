@@ -1,59 +1,55 @@
 # python
-from dataclasses import dataclass, field, fields as dataclass_fields
-from typing import Any, Dict, Union
-import json
+from typing import Any
 
-@dataclass
-class BaseConfigurationItem:
-    all_properties: Dict[str, Any] = field(default_factory=dict)
+from pydantic import BaseModel
 
-    def __getattr__(self, name: str) -> Any:
-        # fallback to all_properties when normal lookup fails
-        if 'all_properties' in self.__dict__ and name in self.__dict__['all_properties']:
-            return self.__dict__['all_properties'][name]
+
+class BaseConfigurationItem(BaseModel):
+    """Base Pydantic model that allows extra fields and exposes them as attributes.
+
+    - extra fields are allowed (model_config = {"extra": "allow"}).
+    - unknown attributes will be stored in the model's extra storage and
+      are accessible as normal attributes (e.g. instance.foo).
+    - provides convenient constructors `from_dict` and `from_json` to match
+      the previous API used by the dataclass-based domain objects.
+    """
+
+    model_config = {"extra": "allow"}
+
+    def __getattr__(self, name: str) -> Any:  # only called if normal lookup fails
+        # pydantic v2 stores extras on __pydantic_extra__
+        extra = getattr(self, "__pydantic_extra__", None)
+        if extra and name in extra:
+            return extra[name]
         raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
 
     def __setattr__(self, name: str, value: Any) -> None:
-        # Determine declared dataclass field names for this class
-        try:
-            field_names = {f.name for f in dataclass_fields(type(self))}
-        except Exception:
-            field_names = set()
-
-        # If it's a declared field, set it normally and also mirror into all_properties
-        if name in field_names:
+        # If it's a declared model field, use BaseModel's __setattr__ to get validation
+        model_fields = getattr(type(self), "model_fields", {})
+        if name in model_fields:
             super().__setattr__(name, value)
-            # ensure all_properties exists and mirror the value
-            if 'all_properties' in self.__dict__:
-                self.__dict__['all_properties'][name] = value
-            else:
-                super().__setattr__('all_properties', {name: value})
-        else:
-            # unknown attributes go into all_properties only
-            if 'all_properties' not in self.__dict__:
-                super().__setattr__('all_properties', {})
-            self.__dict__['all_properties'][name] = value
+            return
 
-    def update_from_dict(self, data: Dict[str, Any]) -> None:
-        # Populate known fields and store all keys in all_properties
-        for k, v in data.items():
-            # Use __setattr__ so declared fields are set and mirrored
-            setattr(self, k, v)
-        # Ensure declared fields that weren't present in input are still reflected in all_properties
-        try:
-            for f in dataclass_fields(type(self)):
-                if f.name not in self.__dict__['all_properties']:
-                    self.__dict__['all_properties'][f.name] = getattr(self, f.name)
-        except Exception:
-            pass
+        # Otherwise, treat it as an extra and store it in __pydantic_extra__
+        extra = getattr(self, "__pydantic_extra__", None)
+        if extra is None:
+            # object.__setattr__ to avoid pydantic's interception
+            object.__setattr__(self, "__pydantic_extra__", {})
+            extra = self.__pydantic_extra__
+        extra[name] = value
 
     @classmethod
-    def from_json(cls, data: Union[str, Dict[str, Any]]) -> "BaseConfigurationItem":
-        if isinstance(data, str):
+    def from_dict(cls, data: Any) -> "BaseConfigurationItem":
+        if isinstance(data, cls):
+            return data
+        return cls.model_validate(data)
+
+    @classmethod
+    def from_json(cls, data: Any) -> "BaseConfigurationItem":
+        import json
+
+        if isinstance(data, (str, bytes, bytearray)):
             parsed = json.loads(data)
         else:
             parsed = data
-        instance = cls()
-        if isinstance(parsed, dict):
-            instance.update_from_dict(parsed)
-        return instance
+        return cls.model_validate(parsed)
