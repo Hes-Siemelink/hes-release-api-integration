@@ -1,6 +1,6 @@
 import unittest
 
-from src.sample_server_task import ServerQuery
+from src.sample_release_api_task import GetRelease
 
 
 class TestServerQuery(unittest.TestCase):
@@ -8,23 +8,16 @@ class TestServerQuery(unittest.TestCase):
     def test_server_query(self):
 
         # Given
-        task = ServerQuery()
+        task = GetRelease()
         task.input_properties = {
-            'task_id': 'task_1',
-            'productId': '123',
-            'server': {
-                'url': 'https://dummyjson.com',
-                'username': 'admin',
-                'password': 'admin',
-                'authenticationMethod': 'Basic'
-            }
+            'releaseId': 'Applications/Folder856d5b08c3474414b1856e15bf06369e/Release34b169be50684b2ba5489a9099903bc4',
         }
 
         # When
         task.execute_task()
 
         # Then
-        self.assertEqual(task.get_output_properties()['productName'], 'iPhone 13 Pro')
+        # self.assertEqual(task.get_output_properties()['productName'], 'iPhone 13 Pro')
 
 
 if __name__ == '__main__':

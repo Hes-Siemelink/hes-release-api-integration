@@ -1,11 +1,3 @@
-# _Template Project for Digital.ai Release Integrations_
-
-_This project serves as a template for developing a Python-based container plugin._
-
-_See [How to create a new project](#how-to-create-a-new-project) below_
-
----
-
 # Digital.ai Release integration to TARGET by PUBLISHER
 
 ⮕ Insert description here
@@ -109,40 +101,3 @@ Create a template with the task **Container Example: Hello** and run it!
 Stop the development environment with the following command:
 
     docker compose down
-
----
-
-## How to create a new project
-
-The  [release-integration-template-python](https://github.com/digital-ai/release-integration-template-python) repository is a template project.
-
-On the main page of this repository, click **Use this template** button, and select **Create new repository**. This will create a duplicate of this project to start developing your own container-based integration. 
-
-**Naming conventions**
-
-Use the following naming convention for developing Digital.ai Release integration plugins:
-
-    [publisher]-release-[target]-integration
-
-Where publisher would be the name of your company.
-
-For example:
-
-    acme-release-example-integration
-
-### Repository configuration
-
-In the new project, update `project.properties` with the name of the integration plugin
-
-```commandline
-cd acme-release-example-integration
-```
-
-Change the following line in `project.properties`:
-
-```
-PLUGIN=acme-release-example-integration
-...
-```
-
-

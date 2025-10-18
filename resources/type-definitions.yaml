@@ -9,9 +9,7 @@
 
 types:
 
-  # All tasks in this project extend the BaseTask.
-  # Defines the container image location and color/icon for all tasks
-  containerExamples.BaseTask:
+  releaseApi.BaseTask:
     extends: xlrelease.ContainerTask
     virtual: true
 
@@ -22,126 +20,11 @@ types:
       iconLocation: test.png
       taskColor: "#667385"
 
-  # All scripts in this project extend the BaseScript.
-  containerExamples.BaseScript:
-    extends: xlrelease.RemoteScriptExecution
-    virtual: true
 
-    hidden-properties:
-      image:
-        default: "@registry.url@/@registry.org@/@project.name@:@project.version@"
-        transient: true
-
-    output-properties:
-      commandResponse:
-        kind: map_string_string
-
-  # Simple example task.
-  # The Python SDK will look for a corresponding Python class called 'Hello'
-  containerExamples.Hello:
-    extends: containerExamples.BaseTask
-    description: "Simple greeter task"
-
-    input-properties:
-      yourName:
-        description: The name to greet
-        kind: string
-        default: World
-
-    output-properties:
-      greeting:
-        kind: string
-
-
-  # Example task that interacts with the Release API
-  containerExamples.SetSystemMessage:
-    extends: containerExamples.BaseTask
+  releaseApi.GetRelease:
+    extends: releaseApi.BaseTask
     description: Simple API task
 
     input-properties:
-      message:
-        description: This message will appear as a banner in the Release UI. Admin access required.
-        kind: string
-
-
-  # Example task that interacts with a third-aprty server
-  containerExamples.ServerQuery:
-    extends: containerExamples.BaseTask
-    description: Simple API task
-
-    input-properties:
-      server:
-        kind: ci
-        referenced-type: containerExamples.Server
-      productId:
-        kind: string
-        default: 123
-
-    output-properties:
-      productName:
-        kind: string
-      productBrand:
-        kind: string
-
-
-  # Example server definition
-  containerExamples.Server:
-    extends: configuration.BasicAuthHttpConnection
-
-    properties:
-      # Overrides 'url' property to give it a default value and a new description
-      url:
-        default: https://dummyjson.com
-        description: A Dummy JSON server
-        required: true
-
-    hidden-properties:
-      testConnectionScript: containerExamples.TestConnection
-
-  # Example test connection script
-  containerExamples.TestConnection:
-    extends: containerExamples.BaseScript
-
-    input-properties:
-      server:
-        kind: ci
-        referenced-type: containerExamples.Server
-
-  # Example lookup task
-  containerExamples.NameLookup:
-    extends: containerExamples.BaseScript
-
-    input-properties:
-      _ci:
-        kind: ci
-        referenced-type: containerExamples.BaseTask
-        required: true
-      _attributes:
-        kind: map_string_string
-        required: true
-      _parameters:
-        kind: ci
-        referenced-type: udm.Parameters
-        required: true
-
-  # Simple example task which uses lookup
-  containerExamples.HelloWithLookup:
-    extends: containerExamples.BaseTask
-    label: "Container Examples: Hello With Lookup"
-    description: Simple greeter task with lookup
-
-    input-properties:
-      yourName:
-        description: The name to greet
-        kind: string
-        input-hint:
-          method-ref: nameLookup
-
-    methods:
-      nameLookup:
-        delegate: remoteScriptLookup
-        script: containerExamples.NameLookup
-
-    output-properties:
-      greeting:
+      releaseId:
         kind: string
