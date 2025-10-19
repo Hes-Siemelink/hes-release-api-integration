@@ -13,8 +13,14 @@ class BaseConfigurationItem(BaseModel):
       are accessible as normal attributes (e.g. instance.foo).
     - provides convenient constructors `from_dict` and `from_json` to match
       the previous API used by the dataclass-based domain objects.
+
+    Additionally this class exposes `to_json` (an instance method) which will
+    serialize both declared fields and any extras (from __pydantic_extra__) into
+    a JSON string. The serialization handles nested BaseModel instances, lists
+    and dicts recursively.
     """
 
+    id: str = "-1"
     model_config = {"extra": "allow"}
 
     def __getattr__(self, name: str) -> Any:  # only called if normal lookup fails
@@ -60,4 +66,48 @@ class BaseConfigurationItem(BaseModel):
 
     @classmethod
     def from_response(cls, response: Response) -> "BaseConfigurationItem":
+        if response.status_code != 200:
+            raise ValueError(f"Response error {response.status_code}: {response.text}")
         return cls.from_json(response.json())
+
+    #
+    # Serialization
+    #
+
+    @staticmethod
+    def _serialize_value(value: Any) -> Any:
+        """Recursively convert pydantic BaseModel instances, lists and dicts into
+        plain Python structures suitable for JSON serialization."""
+        if isinstance(value, BaseModel):
+            # use model_dump to convert declared fields; extras will be merged below
+            base = value.model_dump()
+            extras = getattr(value, "__pydantic_extra__", None) or {}
+            # merge extras, serializing nested values
+            for k, v in extras.items():
+                base[k] = BaseConfigurationItem._serialize_value(v)
+            # ensure nested declared fields are serialized too
+            for k, v in list(base.items()):
+                base[k] = BaseConfigurationItem._serialize_value(v)
+            return base
+        elif isinstance(value, list):
+            return [BaseConfigurationItem._serialize_value(v) for v in value]
+        elif isinstance(value, dict):
+            return {k: BaseConfigurationItem._serialize_value(v) for k, v in value.items()}
+        else:
+            return value
+
+    def to_json(self) -> dict:
+        """Instance method: serialize this model including declared fields and extras.
+
+        Returns a JSON string. Use json.loads(...) to recover a dict.
+        """
+        # serialize declared fields
+        base = self.model_dump()
+        # merge extras explicitly
+        extras = getattr(self, "__pydantic_extra__", None) or {}
+        for k, v in extras.items():
+            base[k] = self._serialize_value(v)
+        # recursively serialize nested declared fields as well
+        for k, v in list(base.items()):
+            base[k] = self._serialize_value(v)
+        return base

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from pydantic import Field
 
@@ -20,6 +20,7 @@ class PlanItem(BaseConfigurationItem):
 
 
 class Task(PlanItem):
+    type: str = "xlrelease.Task"
     documentationPage: Optional[str] = None
     comments: List[Any] = Field(default_factory=list)
     container: Optional[Any] = None
@@ -28,7 +29,7 @@ class Task(PlanItem):
     status: Optional[Any] = None
     lastStatusChangeBy: Optional[str] = None
     team: Optional[str] = None
-    watchers: Set[str] = Field(default_factory=set)
+    watchers: List[str] = Field(default_factory=list)
     waitForScheduledStartDate: bool = True
     delayDuringBlackout: bool = False
     postponedDueToBlackout: bool = False
@@ -36,7 +37,7 @@ class Task(PlanItem):
     originalScheduledStartDate: Optional[datetime] = None
     hasBeenFlagged: bool = False
     hasBeenDelayed: bool = False
-    preconditionType: Optional[Any] = None
+    # preconditionType: Optional[str] = None
     precondition: Optional[str] = None
     failureHandler: Optional[str] = None
     taskFailureHandlerEnabled: bool = False
@@ -55,7 +56,7 @@ class Task(PlanItem):
 
 
 class Phase(PlanItem):
-    releaseUid: Optional[int] = None
+    type: str = "xlrelease.Phase"
     tasks: List[Task] = Field(default_factory=list)
     release: Optional[Any] = None
     color: Optional[str] = None
@@ -63,6 +64,7 @@ class Phase(PlanItem):
 
 
 class Release(PlanItem):
+    type: str = "xlrelease.Release"
     rootReleaseId: Optional[str] = None
     maxConcurrentReleases: int = 0
     releaseTriggers: List[Any] = Field(default_factory=list)
@@ -108,4 +110,3 @@ class Release(PlanItem):
     archived: bool = False
     ciUid: Optional[int] = None
     tenantId: Optional[str] = None
-

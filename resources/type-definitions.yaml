@@ -28,3 +28,11 @@ types:
     input-properties:
       releaseId:
         kind: string
+
+  releaseApi.AddPhase:
+    extends: releaseApi.BaseTask
+    description: Add a phase to the current release
+
+    input-properties:
+      phaseTitle:
+        kind: string
