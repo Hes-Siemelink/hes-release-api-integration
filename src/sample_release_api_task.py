@@ -1,19 +1,16 @@
-from digitalai.release.integration import BaseTask
-from com.xebialabs.xlrelease.api.v1.release_api import ReleaseApi
+from com.xebialabs.xlrelease.api.v1 import ApiBaseTask
 
-class GetRelease(BaseTask):
+
+class GetRelease(ApiBaseTask):
 
     def execute(self) -> None:
-
-        # Get the message from the input properties
+        # Parse input
         id = self.input_properties['releaseId']
         if not id:
             raise ValueError("The 'id' field cannot be empty")
 
-        # Obtain an instance of the Release API client
-        releaseApi = ReleaseApi(self.get_release_api_client())
+        # Call Release API
+        release = self.releaseApi.getRelease(id)
 
-        release = releaseApi.getRelease(id)
-
-        # Add a line to the comment section in the UI
+        # Process resilt
         self.add_comment(f"Found release {release.title}")

@@ -1,7 +1,8 @@
-# python
+import json
 from typing import Any
 
 from pydantic import BaseModel
+from requests import Response
 
 
 class BaseConfigurationItem(BaseModel):
@@ -38,6 +39,10 @@ class BaseConfigurationItem(BaseModel):
             extra = self.__pydantic_extra__
         extra[name] = value
 
+    #
+    # Parsing
+    #
+
     @classmethod
     def from_dict(cls, data: Any) -> "BaseConfigurationItem":
         if isinstance(data, cls):
@@ -46,10 +51,13 @@ class BaseConfigurationItem(BaseModel):
 
     @classmethod
     def from_json(cls, data: Any) -> "BaseConfigurationItem":
-        import json
 
         if isinstance(data, (str, bytes, bytearray)):
             parsed = json.loads(data)
         else:
             parsed = data
         return cls.model_validate(parsed)
+
+    @classmethod
+    def from_response(cls, response: Response) -> "BaseConfigurationItem":
+        return cls.from_json(response.json())
