@@ -18,6 +18,9 @@ class PlanItem(BaseConfigurationItem):
     flagComment: Optional[str] = None
     overdueNotified: bool = False
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
 
 class Task(PlanItem):
     type: str = "xlrelease.Task"
@@ -54,6 +57,9 @@ class Task(PlanItem):
     supportedInWorkflow: bool = True
     statusLine: Optional[str] = None
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
 
 class Phase(PlanItem):
     type: str = "xlrelease.Phase"
@@ -61,6 +67,9 @@ class Phase(PlanItem):
     release: Optional[Any] = None
     color: Optional[str] = None
     originId: Optional[str] = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
 
 
 class Release(PlanItem):
@@ -79,7 +88,7 @@ class Release(PlanItem):
     status: Optional[Any] = None
     kind: Optional[Any] = None
     tags: List[str] = Field(default_factory=list)
-    categories: Set[str] = Field(default_factory=set)
+    categories: List[str] = Field(default_factory=list)
     variables: List[Any] = Field(default_factory=list)
     calendarLinkToken: Optional[str] = None
     calendarPublished: bool = False
@@ -110,3 +119,6 @@ class Release(PlanItem):
     archived: bool = False
     ciUid: Optional[int] = None
     tenantId: Optional[str] = None
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)

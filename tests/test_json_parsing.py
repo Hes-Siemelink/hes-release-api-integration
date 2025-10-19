@@ -56,13 +56,12 @@ class JsonParseTests(unittest.TestCase):
 
         # serialize the whole release to JSON (class method comes from BaseConfigurationItem)
         release_json = release.to_json()
-        parsed = json.loads(release_json)
 
         # declared field
-        self.assertEqual(parsed.get("title"), "TEST Release")
+        self.assertEqual(release_json.get("title"), "TEST Release")
 
         # phases/tasks should be present and include extras
-        phases = parsed.get("phases", [])
+        phases = release_json.get("phases", [])
         self.assertTrue(len(phases) >= 1)
         tasks = phases[0].get("tasks", [])
         self.assertTrue(len(tasks) >= 1)

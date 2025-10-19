@@ -11,15 +11,16 @@ class AddPhase(ApiBaseTask):
             raise ValueError("Please provide a phase title")
 
         # Build phase object
-        phase = Phase()
-        phase.title = title
-        task = Task()
-        task.title = "Placeholder Task"
-        phase.tasks = [task]
+        phase = Phase(
+            title=title,
+            tasks=[
+                Task(title="Placeholder Task")
+            ]
+        )
 
         # API call
         # XXX addPhase only adds the phase, not the tasks within it
         new_phase = self.phaseApi.addPhase(self.get_release_id(), phase)
 
         # Process result
-        self.add_comment(f"Created new phase {new_phase.title} and id {new_phase.id}")
+        self.add_comment(f"Created new phase {new_phase.title} with id {new_phase.id}")
