@@ -15,17 +15,17 @@ class PhaseApi(ABC):
         return Phase.from_response(response)
 
     def updatePhase(self, phase: Phase) -> Phase:
-        response = self.api.put(f"/api/v1/phases/{phase.id}", json=phase.to_json())
+        response = self.api.put(f"/api/v1/phases/{phase.id}", json=phase.model_dump())
 
         return Phase.from_response(response)
 
     def addTask(self, containerId: str, task: Task, position: Optional[int] = None) -> Task:
-        params = self._clean_params({"position": position})
-        response = self.api.post(f"/api/v1/phases/{containerId}/tasks", json=task.to_json(), params=params)
+        params = with_actual_values({"position": position})
+        response = self.api.post(f"/api/v1/phases/{containerId}/tasks", json=task.model_dump(), params=params)
         return Task.from_response(response)
 
     def searchPhasesByTitle(self, phaseTitle: str, releaseId: str) -> List[Phase]:
-        params = self._clean_params({"phaseTitle": phaseTitle, "releaseId": releaseId})
+        params = with_actual_values({"phaseTitle": phaseTitle, "releaseId": releaseId})
         response = self.api.get("/api/v1/phases/byTitle", params=params)
         return [Phase.from_response(item) for item in response]
 
@@ -33,12 +33,12 @@ class PhaseApi(ABC):
                      phaseTitle: Optional[str],
                      releaseId: str,
                      phaseVersion: Optional[Any] = None) -> List[Phase]:
-        params = self._clean_params({"phaseTitle": phaseTitle, "releaseId": releaseId, "phaseVersion": phaseVersion})
+        params = with_actual_values({"phaseTitle": phaseTitle, "releaseId": releaseId, "phaseVersion": phaseVersion})
         response = self.api.get("/api/v1/phases/search", params=params)
         return [Phase.from_response(item) for item in response]
 
     def addPhase(self, releaseId: str, phase: Phase, position: Optional[int] = None) -> Phase:
-        params = self._clean_params({"position": position})
+        params = with_actual_values({"position": position})
         payload = phase.model_dump()
 
         print(f"Payload for addPhase: {payload}")
@@ -64,8 +64,8 @@ class PhaseApi(ABC):
     def deletePhase(self, phaseId: str) -> None:
         self.api.delete(f"/api/v1/phases/{phaseId}")
 
-    # --- Helpers ---------------------------------------------------------
 
-    @staticmethod
-    def _clean_params(params: Dict[str, Any]) -> Dict[str, Any]:
-        return {k: v for k, v in params.items() if v is not None}
+# Helper methods
+
+def with_actual_values(params: Dict[str, Any]) -> Dict[str, Any]:
+    return {k: v for k, v in params.items() if v is not None}
